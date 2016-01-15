@@ -10,16 +10,17 @@ import re
 
 def getArticle(url):
     print("URL: "+url)
-    html = urlopen(url)
-    articleObj = BeautifulSoup(html.read(), 'html.parser')
+    #html = urlopen(url)
+    #articleObj = BeautifulSoup(html.read(), 'html.parser')
+    articleObj = BeautifulSoup(open("testBB.html"), 'html.parser')
+
     #Get article title. This should have a class name ending in "title"
     title = articleObj.find("h1", {"class":re.compile(".*title")}).get_text()
-    print("TITLE: "+title)
-    
+    ingredients = [i.get_text() for i in articleObj.find_all("li",{"class":"ingredient"})]
+    tags = articleObj.findAll(attrs={"name":"shareaholic:keywords"})[0]['content'].split(',')
+    print(title, ingredients, tags)
 
 # url = "http://www.budgetbytes.com/2015/12/slow-cooker-chicken-tikka-masala/"
-# getArticle(url)
+url = "xyz"
+getArticle(url)
 
-example = BeautifulSoup(open("testBB.html"), 'html.parser')
-title = example.find("h1", {"class":re.compile(".*title")}).get_text()
-print("TITLE: "+title)
