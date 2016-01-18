@@ -28,22 +28,20 @@ def getRecipe(url):
 
 
 def getIndivUrls(baseUrl):
-    #for yr in range(2009, 2017):
-       #for mon in range(1,13):
-            #if (yr > 2009) | (mon > 4):
-                yr = 2015
-                mon = 6
+    allLinks = []
+    for yr in range(2009, 2017):
+       for mon in range(1,13):
+            if (yr > 2009) | (mon > 4):
                 archivUrl = baseUrl + str(yr) + "/" + str(format(mon,'02d')) + "/"
                 html = urlopen(archivUrl)
+                time.sleep(1)
                 recipeObj = BeautifulSoup(html.read(), 'html.parser')
                 allUrls = recipeObj.findAll("a",{"rel":"bookmark"})
-                allLinks = [i.get('href') for i in allUrls]
-                for link in allLinks:
-                    getRecipe(link)
+                allLinks.extend([i.get('href') for i in allUrls])
+    return allLinks
+
 
 def writeXML(url, title, ingreds, tags):
-#    if not root:
-#        root = etree.Element('library')
     root = etree.Element('library')
     xurl = etree.SubElement(root, "url")
     xurl.text = url
@@ -60,9 +58,10 @@ def writeXML(url, title, ingreds, tags):
     for t in tags:
         etree.SubElement(xtags, "tag").text = t.strip()
 
-    print(etree.tostring(root))        
+    ofile = open("testxml.txt", 'w') # change to append
+    ofile.write(etree.tostring(root, pretty_print = False).decode('utf-8'))
 
                     
 baseUrl = "http://www.budgetbytes.com/"
-#getIndivUrls(baseUrl)
+#print(getIndivUrls(baseUrl))
 getRecipe(baseUrl)
