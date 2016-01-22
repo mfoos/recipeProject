@@ -6,6 +6,8 @@ import time
 from lxml import etree
 import unicodedata
 from datetime import datetime
+import pickle
+import os
 
 ##################
 # This script goes through the Budget Bytes archive by month and retrieves
@@ -31,18 +33,28 @@ def getRecipe(url):
 
 
 def getIndivUrls(baseUrl):
-    allLinks = []
-    for yr in range(2009, 2017):
-       for mon in range(1,13):
-            if (yr > 2009) | (mon > 4):
-            # some (?!) of the non-existant months redirect, so going manual
-                archivUrl = baseUrl + str(yr) + "/" + str(format(mon,'02d')) + "/"
-                time.sleep(2)
-                html = urlopen(archivUrl)
-                recipeObj = BeautifulSoup(html.read(), 'html.parser')
-                allUrls = recipeObj.findAll("a",{"rel":"bookmark"})
-                allLinks.extend([i.get('href') for i in allUrls])
-    return allLinks
+    if os.path.isfile("cacheLinks"):
+        with open("cacheLinks","rb") as f:
+            return pickle.load(f)
+    else: 
+        allLinks = []
+        for yr in range(2009, 2017):
+           for mon in range(1,13):
+                if (yr > 2009) | (mon > 4):
+                # some (?!) of the non-existant months redirect, so going manual
+                    archivUrl = baseUrl + str(yr) + "/" + str(format(mon,'02d')) + "/"
+                    print("month page: " + archivUrl)
+                    response = requests.get(archivUrl)
+                    if not response.status_code < 400:
+                        break
+                    time.sleep(1)
+                    html = urlopen(archivUrl)
+                    recipeObj = BeautifulSoup(html.read(), 'html.parser')
+                    allUrls = recipeObj.findAll("a",{"rel":"bookmark"})
+                    allLinks.extend([i.get('href') for i in allUrls])
+        with open("cacheLinks","wb") as f:
+            pickle.dump(allLinks, f)
+        return allLinks
 
 
 def writeXML(url, title, ingreds, tags):
@@ -69,9 +81,10 @@ def writeXML(url, title, ingreds, tags):
                     
 baseUrl = "http://www.budgetbytes.com/"
 links = getIndivUrls(baseUrl)
-filename = "Budget_Bytes_scraping_" + datetime.now().strftime("%Y-%m-%d_%H%M%S" + ".xml")
-ofile = open(filename, 'w')
-ofile.write("<library>")
-for url in links:
-    getRecipe(url)
-ofile.write("</library>")
+#filename = "Budget_Bytes_scraping_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".xml"
+#with open(filename, 'w') as ofile:
+#    ofile.write("<library>")
+#    for url in links:
+#        getRecipe(url)
+#    ofile.write("</library>")
+print(links)
