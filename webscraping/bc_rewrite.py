@@ -19,7 +19,10 @@ import os
 
 def getRecipe(url):
     print("URL: "+url)
-    time.sleep(2)
+    time.sleep(1)
+    response = requests.get(url)
+    if not response.status_code < 400:
+        return
     html = urlopen(url)
     recipeObj = BeautifulSoup(html.read(), 'html.parser')
 
@@ -81,10 +84,9 @@ def writeXML(url, title, ingreds, tags):
                     
 baseUrl = "http://www.budgetbytes.com/"
 links = getIndivUrls(baseUrl)
-#filename = "Budget_Bytes_scraping_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".xml"
-#with open(filename, 'w') as ofile:
-#    ofile.write("<library>")
-#    for url in links:
-#        getRecipe(url)
-#    ofile.write("</library>")
-print(links)
+filename = "Budget_Bytes_scraping_" + datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".xml"
+with open(filename, 'w') as ofile:
+    ofile.write("<library>")
+    for url in links:
+        getRecipe(url)
+    ofile.write("</library>")
