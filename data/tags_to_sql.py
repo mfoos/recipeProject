@@ -1,5 +1,6 @@
 import sqlite3
 import xmltodict
+import unicodedata # gotta remember module name
 
 connection = sqlite3.connect("tags.db")
 c = connection.cursor()
@@ -19,7 +20,7 @@ with open("Budget_Bytes_scraping_2016-01-21_220058.xml","r") as f:
     indoc = f.read()
     recp_dict = xmltodict.parse(indoc)
 
-for i in range(10):
+for i in range(len(recp_dict['library']['recipe'])):
     c.execute('BEGIN')
     title = recp_dict['library']['recipe'][i]['title']
     url = recp_dict['library']['recipe'][i]['url']
@@ -47,5 +48,6 @@ for i in range(10):
         # create entry linking title:tag
 
     connection.commit()
+    # I don't think the transaction locking is ideal
 
 connection.close()
