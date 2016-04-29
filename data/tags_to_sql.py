@@ -1,6 +1,6 @@
 import sqlite3
 import xmltodict
-import unicodedata # gotta remember module name
+#import unicodedata # gotta remember module name
 
 connection = sqlite3.connect("tags.db")
 c = connection.cursor()
@@ -15,6 +15,7 @@ c.execute('DROP TABLE IF EXISTS recipe_has_tag')
 c.execute('''CREATE TABLE recipe_has_tag (recipe_id INTEGER, tag_id INTEGER, 
     FOREIGN KEY(recipe_id) REFERENCES recipe(id), 
     FOREIGN KEY(tag_id) REFERENCES tag(id))''')
+connection.commit()
 
 with open("Budget_Bytes_scraping_2016-01-21_220058.xml","r") as f:
     indoc = f.read()
@@ -48,6 +49,5 @@ for i in range(len(recp_dict['library']['recipe'])):
         # create entry linking title:tag
 
     connection.commit()
-    # I don't think the transaction locking is ideal
 
 connection.close()
